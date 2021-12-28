@@ -5,7 +5,8 @@ import {
   Text,
   View,
   TouchableOpacity,
-  TextInput
+  TextInput,
+  ScrollView
 } from 'react-native';
 
 import { theme } from './colors';
@@ -37,18 +38,14 @@ export default function App() {
       return;
     }
 
-    // Save To Do
     console.log(text);
-    const newToDos = Object.assign(
-      {},
-      toDos,
-      {
-        [Date.now()]: {
-          text: text,
-          work: working
-        }
+    const newToDos = {
+      ...toDos,
+      [Date.now()]: {
+        text: text,
+        work: working
       }
-    );
+    }
 
     setToDos(newToDos);
     onChangeText('');
@@ -87,6 +84,21 @@ export default function App() {
           onSubmitEditing={addToDo}
         ></TextInput>
       </View>
+      <ScrollView>
+        {
+          Object.keys(toDos).filter((toDoKey) => {
+            return (toDos[toDoKey].work === working);
+          }).map((toDoKey) => {
+            return (
+              <View key={toDoKey} style={styles.toDo}>
+                <Text style={styles.toDoText}>
+                  { toDos[toDoKey].text }
+                </Text>
+              </View>
+            );
+          })
+        }
+      </ScrollView>
     </View>
   );
 }
@@ -111,7 +123,18 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderRadius: 30,
-    marginTop: 10,
+    marginVertical: 10,
+    fontSize: 18
+  },
+  toDo: {
+    backgroundColor: theme.toDoBg,
+    paddingVertical: 20,
+    paddingHorizontal: 40,
+    marginVertical: 10,
+    borderRadius: 10
+  },
+  toDoText: {
+    color: 'white',
     fontSize: 18
   }
 });
