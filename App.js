@@ -19,11 +19,39 @@ import { theme } from './colors';
 
 export default function App() {
   const [working, setWorking] = useState(true);
+  const [text, setText] = useState('');
+  const [toDos, setToDos] = useState({});
+
   const travel = () => {
     setWorking(false);
   };
   const work = () => {
     setWorking(true);
+  };
+
+  const onChangeText = (payload) => {
+    setText(payload);
+  };
+  const addToDo = () => {
+    if (text === '') {
+      return;
+    }
+
+    // Save To Do
+    console.log(text);
+    const newToDos = Object.assign(
+      {},
+      toDos,
+      {
+        [Date.now()]: {
+          text: text,
+          work: working
+        }
+      }
+    );
+
+    setToDos(newToDos);
+    onChangeText('');
   };
 
   return (
@@ -53,10 +81,10 @@ export default function App() {
         <TextInput
           style={styles.textInput}
           placeholder={working ? 'Add a to do.' : 'Where do you want to go?'}
-          returnKeyType="send"
-          onChangeText={(event) => {
-            console.log(event);
-          }}
+          returnKeyType="done"
+          value={text}
+          onChangeText={onChangeText}
+          onSubmitEditing={addToDo}
         ></TextInput>
       </View>
     </View>
