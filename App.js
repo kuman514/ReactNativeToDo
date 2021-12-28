@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import {
   StyleSheet,
@@ -8,6 +8,7 @@ import {
   TextInput,
   ScrollView
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { theme } from './colors';
 
@@ -18,10 +19,13 @@ import { theme } from './colors';
 
 // TextInput
 
+const STORAGE_KEY = '@toDos';
+
 export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState('');
   const [toDos, setToDos] = useState({});
+  const [loadComplete, setLoadComplete] = useState(false);
 
   const travel = () => {
     setWorking(false);
@@ -33,12 +37,37 @@ export default function App() {
   const onChangeText = (payload) => {
     setText(payload);
   };
-  const addToDo = () => {
+  const saveToDos = async (newToDos) => {
+    try {
+      const toDoStr = JSON.stringify(newToDos);
+      await AsyncStorage.setItem(STORAGE_KEY, toDoStr);
+    } catch (error) {
+      console.log('An error occured saving todos');
+    }
+  };
+  const loadToDos = async () => {
+    try {
+      const toDoStr = await AsyncStorage.getItem(STORAGE_KEY);
+      //console.log(toDoStr);
+      const toDoJson = toDoStr !== null ? JSON.parse(toDoStr) : {};
+      setToDos(toDoJson);
+      setLoadComplete(true);
+    } catch (e) {
+      console.log('An error occured loading todos');
+    }
+  };
+  useEffect(() => {
+    if (!loadComplete) {
+      loadToDos();
+    }
+  });
+
+  const addToDo = async () => {
     if (text === '') {
       return;
     }
 
-    console.log(text);
+    //console.log(text);
     const newToDos = {
       ...toDos,
       [Date.now()]: {
@@ -48,6 +77,7 @@ export default function App() {
     }
 
     setToDos(newToDos);
+    await saveToDos(newToDos);
     onChangeText('');
   };
 
