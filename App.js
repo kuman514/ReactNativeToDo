@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
-  TouchableHighlight
+  TextInput
 } from 'react-native';
 
 import { theme } from './colors';
@@ -14,27 +15,49 @@ import { theme } from './colors';
 // TouchableWithoutFeedback -> No UI Change
 // Pressable -> Many expansion
 
+// TextInput
+
 export default function App() {
+  const [working, setWorking] = useState(true);
+  const travel = () => {
+    setWorking(false);
+  };
+  const work = () => {
+    setWorking(true);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
       <View style={styles.header}>
         <TouchableOpacity
-          activeOpacity={0}
-          onPress={() => {
-            console.log('Work')
-          }
-        }>
-          <Text style={styles.btnText}>Work</Text>
+          activeOpacity={0.5}
+          onPress={work}
+        >
+          <Text style={{
+            ...styles.btnText,
+            color: working ? 'white' : 'grey'
+          }}>Work</Text>
         </TouchableOpacity>
-        <TouchableHighlight
-          underlayColor="#DDDDDD"
-          onPress={() => {
-            console.log('Travel');
-          }
-        }>
-          <Text style={styles.btnText}>Travel</Text>
-        </TouchableHighlight>
+        <TouchableOpacity
+          activeOpacity={0.5}
+          onPress={travel}
+        >
+          <Text style={{
+            ...styles.btnText,
+            color: working ? 'grey' : 'white'
+          }}>Travel</Text>
+        </TouchableOpacity>
+      </View>
+      <View>
+        <TextInput
+          style={styles.textInput}
+          placeholder={working ? 'Add a to do.' : 'Where do you want to go?'}
+          returnKeyType="send"
+          onChangeText={(event) => {
+            console.log(event);
+          }}
+        ></TextInput>
       </View>
     </View>
   );
@@ -53,7 +76,14 @@ const styles = StyleSheet.create({
   },
   btnText: {
     fontSize: 44,
-    fontWeight: '600',
-    color: 'white'
+    fontWeight: '600'
+  },
+  textInput: {
+    backgroundColor: 'white',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    marginTop: 10,
+    fontSize: 18
   }
 });
