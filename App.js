@@ -22,21 +22,34 @@ import { theme } from './colors';
 const STORAGE_KEY = '@toDos';
 
 export default function App() {
-  const [working, setWorking] = useState(true);
-  const [text, setText] = useState('');
-  const [toDos, setToDos] = useState({});
-  const [loadComplete, setLoadComplete] = useState(false);
+  const [status, setStatus] = useState({
+    working: true,
+    text: '',
+    toDos: {},
+    loadComplete: false
+  });
 
   const travel = () => {
-    setWorking(false);
+    setStatus({
+      ...status,
+      working: false
+    });
   };
+
   const work = () => {
-    setWorking(true);
+    setStatus({
+      ...status,
+      working: true
+    });
   };
 
   const onChangeText = (payload) => {
-    setText(payload);
+    setStatus({
+      ...status,
+      text: payload
+    });
   };
+
   const saveToDos = async (newToDos) => {
     try {
       const toDoStr = JSON.stringify(newToDos);
@@ -45,38 +58,48 @@ export default function App() {
       console.log('An error occured saving todos');
     }
   };
+
   const loadToDos = async () => {
     try {
       const toDoStr = await AsyncStorage.getItem(STORAGE_KEY);
       //console.log(toDoStr);
       const toDoJson = toDoStr !== null ? JSON.parse(toDoStr) : {};
-      setToDos(toDoJson);
-      setLoadComplete(true);
+      setStatus({
+        ...status,
+        toDos: toDoJson,
+        loadComplete: true
+      });
     } catch (e) {
       console.log('An error occured loading todos');
     }
   };
+
+  // useEffect means...
+  // When the Component finished rendering, the function as a parameter invokes.
   useEffect(() => {
-    if (!loadComplete) {
+    if (!status.loadComplete) {
       loadToDos();
     }
-  });
+  }, []);
 
   const addToDo = async () => {
-    if (text === '') {
+    if (status.text === '') {
       return;
     }
 
-    //console.log(text);
+    //console.log(status.text);
     const newToDos = {
-      ...toDos,
+      ...status.toDos,
       [Date.now()]: {
-        text: text,
-        work: working
+        text: status.text,
+        work: status.working
       }
     }
 
-    setToDos(newToDos);
+    setStatus({
+      ...status,
+      toDos: newToDos
+    });
     await saveToDos(newToDos);
     onChangeText('');
   };
@@ -91,7 +114,7 @@ export default function App() {
         >
           <Text style={{
             ...styles.btnText,
-            color: working ? 'white' : 'grey'
+            color: status.working ? 'white' : 'grey'
           }}>Work</Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -100,29 +123,29 @@ export default function App() {
         >
           <Text style={{
             ...styles.btnText,
-            color: working ? 'grey' : 'white'
+            color: status.working ? 'grey' : 'white'
           }}>Travel</Text>
         </TouchableOpacity>
       </View>
       <View>
         <TextInput
           style={styles.textInput}
-          placeholder={working ? 'Add a to do.' : 'Where do you want to go?'}
+          placeholder={status.working ? 'Add a to do.' : 'Where do you want to go?'}
           returnKeyType="done"
-          value={text}
+          value={status.text}
           onChangeText={onChangeText}
           onSubmitEditing={addToDo}
         ></TextInput>
       </View>
       <ScrollView>
         {
-          Object.keys(toDos).filter((toDoKey) => {
-            return (toDos[toDoKey].work === working);
+          Object.keys(status.toDos).filter((toDoKey) => {
+            return (status.toDos[toDoKey].work === status.working);
           }).map((toDoKey) => {
             return (
               <View key={toDoKey} style={styles.toDo}>
                 <Text style={styles.toDoText}>
-                  { toDos[toDoKey].text }
+                  { status.toDos[toDoKey].text }
                 </Text>
               </View>
             );
