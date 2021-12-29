@@ -79,31 +79,37 @@ export default function ToDoItem(props) {
         )
       }
 
-      <View style={styles.toDoConfig}>
-        <TouchableOpacity onPress={() => {
-          props.onClickFinished();
-        }}>
-          {
-            props.finished ? (
-              <Ionicons name="checkbox" size={24} color="white" />
-            ) : (
-              <Ionicons name="md-square-outline" size={24} color="white" />
-            )
-          }
-        </TouchableOpacity>
+      {
+        status.editing ? (
+          <View style={styles.nothing} />
+        ) : (
+          <View style={styles.toDoConfig}>
+            <TouchableOpacity onPress={() => {
+              props.onClickFinished();
+            }}>
+              {
+                props.finished ? (
+                  <Ionicons name="checkbox" size={24} color="white" />
+                ) : (
+                  <Ionicons name="md-square-outline" size={24} color="white" />
+                )
+              }
+            </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => {
-          onClickUpdate();
-        }}>
-          <Ionicons name="build" size={24} color="white" />
-        </TouchableOpacity>
+            <TouchableOpacity onPress={() => {
+              onClickUpdate();
+            }}>
+              <Ionicons name="build" size={24} color="white" />
+            </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => {
-          props.onClickDelete();
-        }}>
-          <Ionicons name="trash" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
+            <TouchableOpacity onPress={() => {
+              props.onClickDelete();
+            }}>
+              <Ionicons name="trash" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
+        )
+      }
     </View>
   );
 }
@@ -129,8 +135,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     padding: 0,
     borderBottomWidth: 1,
-    borderBottomColor: 'white',
-    marginRight: 15
+    borderBottomColor: 'white'
   },
   todoFinishedText: {
     color: 'grey',
@@ -139,5 +144,8 @@ const styles = StyleSheet.create({
   },
   toDoConfig: {
     flexDirection: 'row'
+  },
+  nothing: {
+    display: 'none'
   }
 });
