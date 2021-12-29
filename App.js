@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 
 import { theme } from './colors';
+import ToDoItem from './ToDoItem';
 
 // Click TouchableOpacity -> Transparent
 // Click TouchableHighlight -> Background light
@@ -168,6 +169,19 @@ export default function App() {
     await saveToDos(newToDos);
   };
 
+  const updateToDo = async (key, newText) => {
+    const newToDos = {
+      ...status.toDos
+    };
+    newToDos[key].text = newText;
+
+    setStatus({
+      ...status,
+      toDos: newToDos
+    });
+    await saveToDos(newToDos);
+  };
+
   //console.log(status.toDos);
 
   return (
@@ -209,31 +223,22 @@ export default function App() {
             return (status.toDos[toDoKey].work === status.working);
           }).map((toDoKey) => {
             return (
-              <View key={toDoKey} style={styles.toDo}>
-                <Text style={
-                  status.toDos[toDoKey].finished ? styles.todoFinishedText : styles.toDoText
-                }>
-                  { status.toDos[toDoKey].text }
-                </Text>
-                <View style={styles.toDoConfig}>
-                  <TouchableOpacity onPress={() => {
-                    finishToDo(toDoKey);
-                  }}>
-                    {
-                      status.toDos[toDoKey].finished ? (
-                        <Ionicons name="checkbox" size={24} color="white" />
-                      ) : (
-                        <Ionicons name="md-square-outline" size={24} color="white" />
-                      )
-                    }
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => {
-                    deleteToDo(toDoKey);
-                  }}>
-                    <Ionicons name="trash" size={24} color="white" />
-                  </TouchableOpacity>
-                </View>
-              </View>
+              <ToDoItem
+                key={toDoKey}
+                id={toDoKey}
+                text={status.toDos[toDoKey].text}
+                work={status.toDos[toDoKey].work}
+                finished={status.toDos[toDoKey].finished}
+                onClickFinished={() => {
+                  finishToDo(toDoKey);
+                }}
+                onUpdate={(newText) => {
+                  updateToDo(toDoKey, newText);
+                }}
+                onClickDelete={() => {
+                  deleteToDo(toDoKey);
+                }}
+              />
             );
           })
         }
