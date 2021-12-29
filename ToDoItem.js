@@ -1,15 +1,11 @@
-import { useEffect, useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
+import { useState } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
-  TextInput,
-  ScrollView,
-  Alert
+  TextInput
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 
 import { theme } from './colors';
@@ -26,17 +22,6 @@ export default function ToDoItem(props) {
     = onClickDelete
   */
 
-  /*
-    <TextInput
-      style={styles.textInput}
-      placeholder={status.working ? 'Add a to do.' : 'Where do you want to go?'}
-      returnKeyType="done"
-      value={status.text}
-      onChangeText={onChangeText}
-      onSubmitEditing={addToDo}
-    ></TextInput>
-  */
-
   const [status, setStatus] = useState({
     editing: false,
     editText: props.text
@@ -50,7 +35,6 @@ export default function ToDoItem(props) {
   };
 
   const onCloseUpdate = () => {
-    // onUpdate
     if (status.editText === '' || status.editText === props.text) {
       setStatus({
         ...status,
@@ -59,6 +43,7 @@ export default function ToDoItem(props) {
       return;
     }
 
+    // Execute onUpdate (Updating this todo)
     props.onUpdate(status.editText);
     setStatus({
       ...status,
@@ -93,10 +78,9 @@ export default function ToDoItem(props) {
           </Text>
         )
       }
-      
+
       <View style={styles.toDoConfig}>
         <TouchableOpacity onPress={() => {
-          // onClickFinished
           props.onClickFinished();
         }}>
           {
@@ -107,12 +91,13 @@ export default function ToDoItem(props) {
             )
           }
         </TouchableOpacity>
+
         <TouchableOpacity onPress={() => {
-          // onClickUpdate
           onClickUpdate();
         }}>
           <Ionicons name="build" size={24} color="white" />
         </TouchableOpacity>
+
         <TouchableOpacity onPress={() => {
           props.onClickDelete();
         }}>
