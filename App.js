@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  Alert
+  Alert,
+  Platform
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -128,31 +129,50 @@ export default function App() {
   };
 
   const deleteToDo = async (key) => {
-    Alert.alert(
-      `Delete ${status.toDos[key].text}`,
-      'Are you sure?',
-      [
-        {
-          text: 'No',
-          style: 'cancel'
-        },
-        {
-          text: 'Yes',
-          onPress: async () => {
-            const newToDos = {
-              ...status.toDos
-            };
-            delete newToDos[key];
-        
-            setStatus({
-              ...status,
-              toDos: newToDos
-            });
-            await saveToDos(newToDos);
-          },
+    switch (Platform.OS) {
+      case 'ios': case 'android':
+        Alert.alert(
+          `Delete ${status.toDos[key].text}`,
+          'Are you sure?',
+          [
+            {
+              text: 'No',
+              style: 'cancel'
+            },
+            {
+              text: 'Yes',
+              onPress: async () => {
+                const newToDos = {
+                  ...status.toDos
+                };
+                delete newToDos[key];
+            
+                setStatus({
+                  ...status,
+                  toDos: newToDos
+                });
+                await saveToDos(newToDos);
+              },
+            }
+          ]
+        );
+        break;
+      case 'web':
+        const ok = confirm(`Delete ${status.toDos[key].text} - are you sure?`);
+        if (ok) {
+          const newToDos = {
+            ...status.toDos
+          };
+          delete newToDos[key];
+      
+          setStatus({
+            ...status,
+            toDos: newToDos
+          });
+          await saveToDos(newToDos);
         }
-      ]
-    );
+        break;
+    }
   };
 
   const finishToDo = async (key) => {
@@ -192,7 +212,8 @@ export default function App() {
           onPress={work}
         >
           <Text style={{
-            ...styles.btnText,
+            fontSize: 44,
+            fontWeight: '600',
             color: status.working ? 'white' : 'grey'
           }}>Work</Text>
         </TouchableOpacity>
@@ -201,7 +222,8 @@ export default function App() {
           onPress={travel}
         >
           <Text style={{
-            ...styles.btnText,
+            fontSize: 44,
+            fontWeight: '600',
             color: status.working ? 'grey' : 'white'
           }}>Travel</Text>
         </TouchableOpacity>
@@ -257,10 +279,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 100
   },
-  btnText: {
-    fontSize: 44,
-    fontWeight: '600'
-  },
   textInput: {
     backgroundColor: 'white',
     paddingVertical: 15,
@@ -268,27 +286,5 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     marginVertical: 10,
     fontSize: 18
-  },
-  toDo: {
-    backgroundColor: theme.toDoBg,
-    paddingVertical: 20,
-    paddingHorizontal: 40,
-    marginVertical: 10,
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
-  toDoText: {
-    color: 'white',
-    fontSize: 18
-  },
-  todoFinishedText: {
-    color: 'grey',
-    fontSize: 18,
-    textDecorationLine: 'line-through'
-  },
-  toDoConfig: {
-    flexDirection: 'row'
   }
 });
