@@ -6,9 +6,11 @@ import {
   View,
   TouchableOpacity,
   TextInput,
-  ScrollView
+  ScrollView,
+  Alert
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
 import { theme } from './colors';
 
@@ -78,6 +80,7 @@ export default function App() {
   // When the Component finished rendering, the function as a parameter invokes.
   useEffect(() => {
     if (!status.loadComplete) {
+      console.log('Loading saved todos');
       loadToDos();
     }
   }, []);
@@ -98,11 +101,41 @@ export default function App() {
 
     setStatus({
       ...status,
-      toDos: newToDos
+      toDos: newToDos,
+      text: ''
     });
     await saveToDos(newToDos);
-    onChangeText('');
   };
+
+  const deleteToDo = async (key) => {
+    Alert.alert(
+      `Delete ${status.toDos[key].text}`,
+      'Are you sure?',
+      [
+        {
+          text: 'No',
+          style: 'cancel'
+        },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            const newToDos = {
+              ...status.toDos
+            };
+            delete newToDos[key];
+        
+            setStatus({
+              ...status,
+              toDos: newToDos
+            });
+            await saveToDos(newToDos);
+          },
+        }
+      ]
+    );
+  };
+
+  //console.log(status.toDos);
 
   return (
     <View style={styles.container}>
@@ -147,6 +180,11 @@ export default function App() {
                 <Text style={styles.toDoText}>
                   { status.toDos[toDoKey].text }
                 </Text>
+                <TouchableOpacity onPress={() => {
+                  deleteToDo(toDoKey);
+                }}>
+                  <Ionicons name="trash" size={24} color="white" />
+                </TouchableOpacity>
               </View>
             );
           })
@@ -184,7 +222,10 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 40,
     marginVertical: 10,
-    borderRadius: 10
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
   },
   toDoText: {
     color: 'white',
