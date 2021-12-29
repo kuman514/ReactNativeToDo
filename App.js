@@ -36,7 +36,7 @@ export default function App() {
     try {
       const workingStr = JSON.stringify(newWorking);
       await AsyncStorage.setItem(MODE_KEY, workingStr);
-      console.log(`Saved workingMode: ${workingStr}`);
+      //console.log(`Saved workingMode: ${workingStr}`);
     } catch (error) {
       console.log('An error occured saving mode');
     }
@@ -114,9 +114,10 @@ export default function App() {
       ...status.toDos,
       [Date.now()]: {
         text: status.text,
-        work: status.working
+        work: status.working,
+        finished: false
       }
-    }
+    };
 
     setStatus({
       ...status,
@@ -152,6 +153,19 @@ export default function App() {
         }
       ]
     );
+  };
+
+  const finishToDo = async (key) => {
+    const newToDos = {
+      ...status.toDos
+    };
+    newToDos[key].finished = !newToDos[key].finished;
+
+    setStatus({
+      ...status,
+      toDos: newToDos
+    });
+    await saveToDos(newToDos);
   };
 
   //console.log(status.toDos);
@@ -196,14 +210,29 @@ export default function App() {
           }).map((toDoKey) => {
             return (
               <View key={toDoKey} style={styles.toDo}>
-                <Text style={styles.toDoText}>
+                <Text style={
+                  status.toDos[toDoKey].finished ? styles.todoFinishedText : styles.toDoText
+                }>
                   { status.toDos[toDoKey].text }
                 </Text>
-                <TouchableOpacity onPress={() => {
-                  deleteToDo(toDoKey);
-                }}>
-                  <Ionicons name="trash" size={24} color="white" />
-                </TouchableOpacity>
+                <View style={styles.toDoConfig}>
+                  <TouchableOpacity onPress={() => {
+                    finishToDo(toDoKey);
+                  }}>
+                    {
+                      status.toDos[toDoKey].finished ? (
+                        <Ionicons name="checkbox" size={24} color="white" />
+                      ) : (
+                        <Ionicons name="md-square-outline" size={24} color="white" />
+                      )
+                    }
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => {
+                    deleteToDo(toDoKey);
+                  }}>
+                    <Ionicons name="trash" size={24} color="white" />
+                  </TouchableOpacity>
+                </View>
               </View>
             );
           })
@@ -249,5 +278,13 @@ const styles = StyleSheet.create({
   toDoText: {
     color: 'white',
     fontSize: 18
+  },
+  todoFinishedText: {
+    color: 'grey',
+    fontSize: 18,
+    textDecorationLine: 'line-through'
+  },
+  toDoConfig: {
+    flexDirection: 'row'
   }
 });
