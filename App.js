@@ -22,6 +22,7 @@ import { theme } from './colors';
 // TextInput
 
 const STORAGE_KEY = '@toDos';
+const MODE_KEY = '@working';
 
 export default function App() {
   const [status, setStatus] = useState({
@@ -31,18 +32,30 @@ export default function App() {
     loadComplete: false
   });
 
-  const travel = () => {
+  const saveMode = async (newWorking) => {
+    try {
+      const workingStr = JSON.stringify(newWorking);
+      await AsyncStorage.setItem(MODE_KEY, workingStr);
+      console.log(`Saved workingMode: ${workingStr}`);
+    } catch (error) {
+      console.log('An error occured saving mode');
+    }
+  };
+
+  const travel = async () => {
     setStatus({
       ...status,
       working: false
     });
+    await saveMode(false);
   };
 
-  const work = () => {
+  const work = async () => {
     setStatus({
       ...status,
       working: true
     });
+    await saveMode(true);
   };
 
   const onChangeText = (payload) => {
@@ -61,14 +74,20 @@ export default function App() {
     }
   };
 
-  const loadToDos = async () => {
+  const loadToDosAndMode = async () => {
     try {
       const toDoStr = await AsyncStorage.getItem(STORAGE_KEY);
-      //console.log(toDoStr);
+      const savedMode = await AsyncStorage.getItem(MODE_KEY);
+
+      //console.log(toDoStr, savedMode);
+
       const toDoJson = toDoStr !== null ? JSON.parse(toDoStr) : {};
+      const initWorking = savedMode !== null ? JSON.parse(savedMode) : true;
+
       setStatus({
         ...status,
         toDos: toDoJson,
+        working: initWorking,
         loadComplete: true
       });
     } catch (e) {
@@ -80,8 +99,8 @@ export default function App() {
   // When the Component finished rendering, the function as a parameter invokes.
   useEffect(() => {
     if (!status.loadComplete) {
-      console.log('Loading saved todos');
-      loadToDos();
+      console.log('Loading saved todos and modes');
+      loadToDosAndMode();
     }
   }, []);
 
